@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from '../Components/productCard/Card.jsx';
+import Card from '../Components/ProductCard/Card.jsx';
 import { useSelector } from 'react-redux';
 
 const Shop = () => {
