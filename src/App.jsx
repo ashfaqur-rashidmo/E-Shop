@@ -8,10 +8,15 @@ import Checkout from "./Components/Checkout"
 import { useState } from "react"
 import Order from "./Pages/Order"
 import Filter from "./Components/Filter"
+import Login from "../Firebase/Login"
+import Signup from "../Firebase/Register"
 function App() {
   const [order,setOrder] = useState(null)
+  const[showLogin,setShowLogin] = useState(true)
   return (
-    
+     
+      
+
     <BrowserRouter>
     <Navbar/>
     <Routes>
@@ -24,6 +29,7 @@ function App() {
     </Routes>
     <Footer/>
     </BrowserRouter>
+   
     
   )
 }

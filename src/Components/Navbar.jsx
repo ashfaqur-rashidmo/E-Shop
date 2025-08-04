@@ -1,21 +1,44 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Modal from "./Modal";
-import Login from "./Login";
-import Register from "./Register";
+import Login from "./../../Firebase/Login";
+import Register from "../../Firebase/Register";
 import { setSearchTerm } from "../Redux/Product";
-
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+import { signOut } from "firebase/auth";
+import { auth } from "../../Firebase/firebase-config"; 
 
 const Navbar = () => {
     const [isModelOpen, setIsModelOpen] = useState(false); 
     const [isLogin, setIsLogin] = useState(true);
+    const [user, setUser] = useState(null);
     const products = useSelector(state => state.cart.products);
     const [search,setSearch] = useState()
     const dispatch = useDispatch()
     const navigate =useNavigate()
 
+
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    setUser(null); 
+    navigate('/'); 
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+};
+
+
+    useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+  });
+
+  return () => unsubscribe();
+}, []);
 
     const handleSearch = (e) => {
         e.preventDefault()
@@ -45,21 +68,38 @@ const Navbar = () => {
                     </form>
                 </div>
                 <div className='flex items-center space-x-4'>
-                    <Link to="/cart" className='relative'>
-                        <FaShoppingCart className='text-lg' />
-                        {products.length > 0 && (
-                            <span className='absolute top-0 text-xs w-3 left-3 bg-red-600 rounded-full flex justify-center items-center text-white'>
-                                {products.length}
-                            </span>
-                        )}
-                    </Link>
-                    <button className='hidden md:block' onClick={openLogin}>
-                        Login | Register
-                    </button>
-                    <button className='block md:hidden'>
-                        <FaUser />
-                    </button>
-                </div>
+  <Link to="/cart" className='relative'>
+    <FaShoppingCart className='text-lg' />
+    {products.length > 0 && (
+      <span className='absolute top-0 text-xs w-3 left-3 bg-red-600 rounded-full flex justify-center items-center text-white'>
+        {products.length}
+      </span>
+    )}
+  </Link>
+
+{user ? (
+  <div className="flex items-center gap-2">
+    <span className="text-sm text-gray-700">Hi, {user.email}</span>
+    <button 
+      onClick={handleLogout} 
+      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+    >
+      Logout
+    </button>
+  </div>
+) : (
+  <>
+    <button className='hidden md:block' onClick={openLogin}>
+      Login | Register
+    </button>
+    <button className='block md:hidden' onClick={openLogin}>
+      <FaUser />
+    </button>
+  </>
+)}
+
+</div>
+
             </div>
             <div className='flex items-center justify-center space-x-10 py-4 text-sm font-bold'>
                 <Link to="/" className='hover:underline'>
@@ -76,9 +116,15 @@ const Navbar = () => {
                 </Link>
             </div>
             
-            <Modal isModelOpen={isModelOpen} setIsModelOpen={setIsModelOpen}>
-                {isLogin ? <Login openSignUp={openSignUp} /> : <Register openLogin={openLogin} />}
-            </Modal>
+          <Modal isModelOpen={isModelOpen} setIsModelOpen={setIsModelOpen}>
+  {isLogin ? (
+    <Login openSignUp={openSignUp} setIsModelOpen={setIsModelOpen} />
+  ) : (
+    <Register openLogin={openLogin} setIsModelOpen={setIsModelOpen} />
+  )}
+</Modal>
+
+
         </nav>
     );
 };

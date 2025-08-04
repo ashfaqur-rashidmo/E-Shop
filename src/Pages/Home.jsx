@@ -6,11 +6,13 @@ import Category from '../Components/Category';
 import { setProducts } from '../Redux/Product.jsx';
 import { useDispatch, useSelector } from 'react-redux';
 import Card from '../Components/ProductCard/Card.jsx';
-import Shop from './Shop.jsx';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../../Firebase/firebase-config.js';
 
 const Home = () => {
     const dispatch = useDispatch();
     const Products = useSelector(state => state.product);
+    const [user,loading] = useAuthState(auth)
 
     useEffect(() => {
         dispatch(setProducts(Data));
@@ -44,13 +46,22 @@ const Home = () => {
             <Category/>
             <div className='container mx-auto py-12'>
                 <h2 className='text-2xl font-bold mb-6 text-center '>Top Products</h2>
-             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 cursor-pointer'>
+                {loading ? (
+                    <p className='text-center text-gray-500'>Checking Login Status</p>
+                ) : user ? (
+                 <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 cursor-pointer'>
             {Products.products.slice(0, 5).map(((product) =>(
                 <Card key={product.id} product={product}/>
             )))}
+            </div>
+            ) : (
+                <div className='text-center text-red-600 text-sm'>
+                    You must be logged in to view Products
+                </div>
+            )}
+             
         </div>
-        </div>
-        <Shop/>
+        {/* <Shop/> */}
         </div>
     );
 };
